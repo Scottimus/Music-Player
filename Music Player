@@ -1,0 +1,26 @@
+# Music Player
+
+A simple music player application built with Python, pygame, and Tkinter.
+
+![Music Player Screenshot](screenshot.png)
+
+## Features
+
+- Browse and play music files in a specified directory
+- Play/pause, stop, and skip to the next or previous track
+- Shuffle mode to randomly play tracks
+- Volume control using a slider
+- Display of current track information
+
+## Requirements
+
+- Python 3.x
+- pygame library
+- Tkinter library
+
+## Installation
+
+1. Clone the repository:
+
+   ```shell
+   git clone https://github.com/your-username/music-player.git
