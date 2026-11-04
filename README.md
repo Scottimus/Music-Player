@@ -1,5 +1,7 @@
 # Python Music Player
 
+[![Tests](https://github.com/Scottimus/Music-Player/actions/workflows/tests.yml/badge.svg)](https://github.com/Scottimus/Music-Player/actions/workflows/tests.yml)
+
 A desktop audio player built with Python, Tkinter, and pygame. It plays local MP3 and FLAC files directly through SDL_mixer.
 
 ![Music Player interface](images/music-player.png)
