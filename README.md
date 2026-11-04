@@ -13,4 +13,4 @@ python -m pip install pygame pydub
 python MusicPlayer.py
 ```
 
-Use the file picker to add a local audio file and try the playback controls.
+Choose a folder containing `.mp3` or `.flac` files, select a track, and click **Play**. FLAC playback converts the selected track to a temporary WAV file in the working directory.
