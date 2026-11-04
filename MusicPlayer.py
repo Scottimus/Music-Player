@@ -1,8 +1,6 @@
 import os
 import pygame
-from tkinter import Tk, Label, Button, Listbox, filedialog
-from pydub import AudioSegment
-from pydub.utils import mediainfo
+from tkinter import Tk, Label, Button, Listbox, filedialog, messagebox
 
 class MusicPlayer:
     def __init__(self, master):
@@ -40,16 +38,21 @@ class MusicPlayer:
         self.music_files = []
 
         self.current_track = None
+        self.paused = False
 
         pygame.mixer.init()
 
     def load_music(self):
         directory = filedialog.askdirectory()
         if directory:
+            self.stop_music()
+            self.current_track = None
             self.music_directory = directory
-            self.music_files = [
-                f for f in os.listdir(self.music_directory) if f.endswith((".mp3", ".flac"))
-            ]
+            self.music_files = sorted(
+                f for f in os.listdir(self.music_directory)
+                if f.lower().endswith((".mp3", ".flac"))
+                and os.path.isfile(os.path.join(directory, f))
+            )
             self.playlist.delete(0, "end")
             for file in self.music_files:
                 self.playlist.insert("end", file)
@@ -58,40 +61,47 @@ class MusicPlayer:
         selected_track = self.playlist.get("active")
         if selected_track:
             track_path = os.path.join(self.music_directory, selected_track)
-            if track_path.endswith(".flac"):
-                audio = AudioSegment.from_file(track_path, format="flac", ffmpeg="C:\Program Files (x86)\ffmpeg\ffmpeg-6.0-essentials_build\bin")
-                audio.export("temp.wav", format="wav")
-                track_path = "temp.wav"
-
-            pygame.mixer.music.load(track_path)
-            pygame.mixer.music.play()
+            try:
+                pygame.mixer.music.load(track_path)
+                pygame.mixer.music.play()
+            except (pygame.error, OSError) as error:
+                messagebox.showerror("Playback error", str(error))
+                return
             self.current_track = selected_track
+            self.paused = False
             self.current_track_info.config(text=self.current_track)
 
     def pause_music(self):
-        if pygame.mixer.music.get_busy():
+        if self.paused:
+            pygame.mixer.music.unpause()
+            self.paused = False
+        elif pygame.mixer.music.get_busy():
             pygame.mixer.music.pause()
+            self.paused = True
 
     def stop_music(self):
-        if pygame.mixer.music.get_busy():
-            pygame.mixer.music.stop()
-            self.current_track_info.config(text="")
+        pygame.mixer.music.stop()
+        self.paused = False
+        self.current_track_info.config(text="")
 
     def next_track(self):
-        current_index = self.music_files.index(self.current_track)
-        next_index = (current_index + 1) % len(self.music_files)
-        self.playlist.selection_clear(0, "end")
-        self.playlist.selection_set(next_index)
-        self.playlist.activate(next_index)
-        self.playlist.see(next_index)
-        self.play_music()
+        self.step_track(1)
 
     def previous_track(self):
-        current_index = self.music_files.index(self.current_track)
-        previous_index = (current_index - 1) % len(self.music_files)
+        self.step_track(-1)
+
+    def step_track(self, direction):
+        if not self.music_files:
+            return
+        if self.current_track in self.music_files:
+            index = (self.music_files.index(self.current_track) + direction) % len(self.music_files)
+        else:
+            index = 0 if direction > 0 else len(self.music_files) - 1
         self.playlist.selection_clear(0, "end")
-        self.playlist.selection_set(previous_index)
-        self.playlist.activate(previous_index)
+        self.playlist.selection_set(index)
+        self.playlist.activate(index)
+        self.playlist.see(index)
+        self.play_music()
        
 if __name__ == "__main__":
     root = Tk()
